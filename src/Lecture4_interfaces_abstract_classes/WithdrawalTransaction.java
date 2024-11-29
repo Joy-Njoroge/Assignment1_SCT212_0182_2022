@@ -18,7 +18,7 @@ public class WithdrawalTransaction extends BaseTransaction {
     }
 
     // Method to reverse the transaction
-    public boolean reverse() {
+    public boolean reverse(BankAccount account) {
         return true;
     } // return true if reversal was successful
 

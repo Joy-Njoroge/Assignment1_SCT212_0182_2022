@@ -1,59 +1,38 @@
 package Assignment1_BankSystem;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Calendar;
 
+// Import the InsufficientFundsException class
+import Assignment1_BankSystem.InsufficientFundsException;
+
 public class WithdrawalTransaction extends BaseTransaction {
-    private boolean reversed = false;
-    public WithdrawalTransaction(int amount, @NotNull Calendar date) {
+
+    public WithdrawalTransaction(double amount, Calendar date) {
         super(amount, date);
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Withdrawal amount must be positive.");
+        }
     }
 
-    private boolean checkDepositAmount(int amt) {
-        if (amt < 0) {
-            return false;
+    @Override
+    public void apply(BankAccount ba) throws InsufficientFundsException {
+        if (ba.getBalance() >= getAmount()) {
+            ba.setBalance(ba.getBalance() - getAmount());
         } else {
-            return true;
+            throw new InsufficientFundsException("Insufficient funds for withdrawal of $" + getAmount());
         }
     }
 
-    // Method to reverse the transaction
-    public boolean reverse(BankAccount ba) {
-        if (!reversed) {
-            ba.setBalance(ba.getBalance() + getAmount());
-            reversed = true;
-            System.out.println("Reversal successful. New balance: $" + ba.getBalance());
-            return true;
-        }
-        System.out.println("Reversal already applied.");
-        return false;
-    }
-
-    // Method to print a transaction receipt or details
+    @Override
     public void printTransactionDetails() {
-        System.out.println("Deposit Trasaction: " + this.toString());
+        System.out.println("Amount: $" + getAmount());
+        System.out.println("Date: " + getDate().getTime());
+        System.out.println("Transaction ID: " + getTransactionID());
     }
 
-
-    public void apply(BankAccount ba) {
-        try {
-            double curr_balance = ba.getBalance();
-            if (curr_balance >= getAmount()) {
-                ba.setBalance(curr_balance - getAmount());
-                System.out.println("Withdrew $" + getAmount() + ". New balance: $" + ba.getBalance());
-            } else if (curr_balance > 0) {
-                ba.setBalance(0);
-                System.out.println("Partial withdrawal of $" + curr_balance + " made. Account balance is now $0.");
-                throw new InsufficientFundsException("Remaining amount $" + (getAmount() - curr_balance) + " not withdrawn.");
-            } else {
-                throw new InsufficientFundsException("Insufficient funds. Withdrawal amount exceeds balance.");
-            }
-        } catch (InsufficientFundsException e) {
-            System.out.println(e.getMessage());
-        } finally {
-            System.out.println("Transaction complete.");
-        }
+    // New reverse method to reverse the withdrawal
+    public void reverse(BankAccount ba) {
+        ba.setBalance(ba.getBalance() + getAmount()); // Add the withdrawn amount back to the balance
+        System.out.println("Reversal of withdrawal successful.");
     }
-
 }
